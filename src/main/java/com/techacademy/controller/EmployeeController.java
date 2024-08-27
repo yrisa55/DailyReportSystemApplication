@@ -136,22 +136,23 @@ public class EmployeeController {
             return "employees/update";
            }
         
-            // パスワードの形式チェック（半角英数字以外の文字が含まれているかどうか）
-            if (!password.matches("^[a-zA-Z0-9]+$")) {
-                System.out.println("パスワード形式チェック");
-                model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.HALFSIZE_ERROR),
-                        ErrorMessage.getErrorValue(ErrorKinds.HALFSIZE_ERROR));
-                System.out.println("パスワードの形式エラー");
+           // パスワードの形式チェック（半角英数字以外の文字が含まれているかどうか）
+           if (!password.matches("^[a-zA-Z0-9]+$")) {
+               System.out.println("パスワード形式チェック");
+               model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.HALFSIZE_ERROR),
+                       ErrorMessage.getErrorValue(ErrorKinds.HALFSIZE_ERROR));
+               System.out.println("パスワードの形式エラー");
                 return "employees/update";
-            }
+           }
+        
             
-             //バリデーションチェック
-            if (res.hasErrors()) {
-                System.out.println("バリデーションエラーあり");
-                //エラーがあれば、再度更新画面に戻す
-                return "employees/update";
-               }
-          }
+           //パスワードが入力されているときだけバリデーションチェック
+           if (res.hasErrors()) {
+            System.out.println("バリデーションエラーあり");
+            //エラーがあれば、再度更新画面に戻す
+            return "employees/update";
+           }
+        }
         
         try {
             // 従業員情報を更新
@@ -166,7 +167,6 @@ public class EmployeeController {
             model.addAttribute("employee", employee);
             return "employees/update";
         }
-        
      
         // 一覧画面にリダイレクト
         return "redirect:/employees";
