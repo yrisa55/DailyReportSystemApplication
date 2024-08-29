@@ -52,17 +52,27 @@ public class EmployeeService {
         return ErrorKinds.SUCCESS;
     }
     
+    //　従業員更新
     // --- 追加ここから ----
     public ErrorKinds update(Employee employee) {
+        
+        Employee existingEmployee = findByCode(employee.getCode());
+        
+        if (existingEmployee != null) {
+            // 作成日時は既存のものを保持
+            employee.setCreatedAt(existingEmployee.getCreatedAt());
+        
+        }
         
         //よく分からないけど上を真似した
         employee.setDeleteFlg(false);
         
         LocalDateTime now = LocalDateTime.now();
-        employee.setCreatedAt(now);
+        //employee.setCreatedAt(now);
         employee.setUpdatedAt(now);
 
         this.employeeRepository.save(employee);
+        
         return ErrorKinds.SUCCESS;
     }
     
