@@ -61,7 +61,20 @@ public class EmployeeService {
         if (existingEmployee != null) {
             // 作成日時は既存のものを保持
             employee.setCreatedAt(existingEmployee.getCreatedAt());
-        
+            System.out.println("password:" + employee.getPassword());
+            
+            // パスワードが空白でない場合のみチェックと暗号化を行う
+            if (!"".equals(employee.getPassword())) {
+                // パスワードの形式と桁数のチェック
+                ErrorKinds passwordCheckResult = employeePasswordCheck(employee);
+                if (passwordCheckResult != ErrorKinds.CHECK_OK) {
+                    return passwordCheckResult;
+                }
+           
+            } else {
+                // パスワードが空白の場合、既存のパスワードをそのまま使用
+                employee.setPassword(existingEmployee.getPassword());
+            }    
         }
         
         //よく分からないけど上を真似した
@@ -72,6 +85,7 @@ public class EmployeeService {
         employee.setUpdatedAt(now);
 
         this.employeeRepository.save(employee);
+        System.out.println(employee);
         
         return ErrorKinds.SUCCESS;
     }
