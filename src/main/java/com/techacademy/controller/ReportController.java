@@ -20,7 +20,8 @@ import com.techacademy.constants.ErrorMessage;
 
 import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
-// import com.techacademy.service.EmployeeService;
+import com.techacademy.service.EmployeeService;
+import com.techacademy.repository.EmployeeRepository;
 import com.techacademy.service.ReportService;
 import com.techacademy.service.UserDetail;
 
@@ -29,10 +30,12 @@ import com.techacademy.service.UserDetail;
 public class ReportController {
 
     private final ReportService reportService;
+    private final EmployeeRepository employeeRepository;
 
     @Autowired
-    public ReportController(ReportService reportService) {
+    public ReportController(ReportService reportService, EmployeeRepository employeeRepository) {
         this.reportService = reportService;
+        this.employeeRepository = employeeRepository;
     }
     
     // 日報一覧画面
@@ -64,32 +67,50 @@ public class ReportController {
 
          return "reports/new";
       }
-//    
-//    // 日報新規登録処理
-//    @PostMapping("/add")
-//    public String create(@Validated Report report, BindingResult res, Model model) {
-//        if (res.hasErrors()) {
-//        return "reports/new";
-//        }
-//        
-//        try {
-//            reportService.save(report);
-//        } catch (DataIntegrityViolationException e) {
-//            model.addAttribute("error", "登録に失敗しました。");
-//            return "reports/new";
-//            
-//        }
-//        
-//        return "redirect:/reports";
-//    }
-//    
-//    
+    
+      // 日報新規登録処理
+      @PostMapping("/add")
+      public String add(@ModelAttribute Report report, BindingResult res, Model model) {
+          // デバッグ用
+          System.out.println("Received report:" + report);
+         
+          if (res.hasErrors()) {
+          System.out.println("BindingResultエラー" + res.hasErrors());
+          System.out.println("バリデーションエラー" + res.getAllErrors());
+          return "reports/new";
+          }
+          
+          try {
+              // Employeeを保存する
+              if (report.getEmployee() != null && report.getEmployee().getCode() != null) {
+                  Employee employee = employeeRepository.findById(report.getEmployee().getCode()).orElse(null);
+                  if (employee == null) {
+                      // 新しい Employee を保存するロジック（必要な場合）
+                      employeeRepository.save(report.getEmployee());
+                  }
+              }
+              
+              // Reportを保存する
+              System.out.println("保存前のレポート" + report);
+              reportService.save(report);
+              System.out.println("保存成功");
+          } catch (DataIntegrityViolationException e) {
+              System.out.println("レポートセーブ中にエラー" + e.getMessage());
+              model.addAttribute("error", "登録に失敗しました。");
+              return "reports/new";
+              
+          }
+          
+          return "redirect:/reports";
+      }
+    
+    
       // 日報更新画面
       @GetMapping(value = "/{id}/update")
       public String edit(@PathVariable int id, Model model) {
           
           Report report = reportService.findById(id);
-          System.out.println(report);
+          //System.out.println(report);
         
           model.addAttribute("report", report);
           
@@ -116,4 +137,6 @@ public class ReportController {
          // 一覧画面にリダイレクト
          return "redirect:/reports";
        }
+      
+      // 日報削除処理
 }

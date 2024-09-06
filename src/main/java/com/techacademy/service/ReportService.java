@@ -14,6 +14,7 @@ import com.techacademy.constants.ErrorKinds;
 import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
+import com.techacademy.repository.EmployeeRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -25,6 +26,10 @@ public class ReportService {
     public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
     }
+        
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    
     
     // 日報一覧表示処理 全件を検索して返す
     public List<Report> findAll() {
@@ -33,9 +38,39 @@ public class ReportService {
     }
     
     // 日報保存
-    //public Errorkinds save (Report report) {
+    public ErrorKinds save (Report report) {
+        // Employeeが新規であれば保存する
+        if(report.getEmployee().getCode() == null) {
+        employeeRepository.save(report.getEmployee());
+        }
         
-    //}
+//        // 日付チェック
+//        if (!"".equals(report.getReportDate())) {
+//            return ErrorKinds.BLANK_ERROR;
+//        }
+//        // タイトル空欄でないかチェック
+//        if (!"".equals(report.getTitle())) {
+//            return ErrorKinds.BLANK_ERROR;
+//        }
+//          
+//        // タイトル桁数超過チェック
+//          
+//        // 内容空欄でないかチェック
+//        if (!"".equals(report.getContent())) {
+//            return ErrorKinds.BLANK_ERROR;
+//        }
+//        // 内容桁数超過チェック
+        
+        
+        report.setDeleteFlg(false);
+
+        LocalDateTime now = LocalDateTime.now();
+        report.setCreatedAt(now);
+        report.setUpdatedAt(now);
+
+        reportRepository.save(report);
+        return ErrorKinds.SUCCESS;
+    }
     
  //　従業員更新
     // --- 追加ここから ----

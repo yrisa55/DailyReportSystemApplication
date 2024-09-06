@@ -35,7 +35,7 @@
                                         <label class="form-label" for="name">氏名</label>
                                         <!--<p class="mb-1"></p>-->
                                         <div class="col-md-7">
-                                            <input class="form-control" type="text" th:field="*{employee.name}" th:errorclass="err" id="name" readonly>
+                                            <input class="form-control" type="text" th:field="*{employee.name}" th:errorclass="err" id="name">
                                             <span th:errors="*{employee.name}" class="text-danger"></span>
                                         </div>
                                     </div>

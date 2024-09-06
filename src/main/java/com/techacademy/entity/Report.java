@@ -39,10 +39,12 @@ public class Report {
     
     // タイトル
     @Column(length = 100)
+    @NotNull
     private String title;
     
     // 内容
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition="LONGTEXT", length = 600)
+    @NotNull
     private String content;
     
     // 社員番号
@@ -52,14 +54,17 @@ public class Report {
     
     // 削除フラグ
     @Column(columnDefinition="TINYINT")
+    @NotNull
     private boolean deleteFlg;
     
     // 登録日時
     @Column(nullable = false)
+    @NotNull
     private LocalDateTime createdAt;
 
     // 更新日時
     @Column(nullable = false)
+    @NotNull
     private LocalDateTime updatedAt;
     
 

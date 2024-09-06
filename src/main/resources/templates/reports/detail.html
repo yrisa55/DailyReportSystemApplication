@@ -48,7 +48,7 @@
                                 </table>
                                    <div class="mt-5 row g-1">
                                         <div class="col-auto">
-                                            <form name="form" th:action="@{/reports/{code}/update(code=${code})}" th:method="get">
+                                            <form name="form" th:action="@{/reports/{code}/update(code=${report.id})}" th:method="get">
                                                 <input type="submit" value="更新" class="btn btn-primary">
                                             </form>
                                         </div>
