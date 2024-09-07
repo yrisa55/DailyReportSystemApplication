@@ -70,7 +70,7 @@ public class ReportController {
     
       // 日報新規登録処理
       @PostMapping("/add")
-      public String add(@ModelAttribute Report report, BindingResult res, Model model) {
+      public String add(@ModelAttribute Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
           // デバッグ用
           System.out.println("Received report:" + report);
          
@@ -81,14 +81,8 @@ public class ReportController {
           }
           
           try {
-              // Employeeを保存する
-              if (report.getEmployee() != null && report.getEmployee().getCode() != null) {
-                  Employee employee = employeeRepository.findById(report.getEmployee().getCode()).orElse(null);
-                  if (employee == null) {
-                      // 新しい Employee を保存するロジック（必要な場合）
-                      employeeRepository.save(report.getEmployee());
-                  }
-              }
+              Employee employee = employeeRepository.findByCode(userDetail.getUsername());
+              report.setEmployee(employee);
               
               // Reportを保存する
               System.out.println("保存前のレポート" + report);
