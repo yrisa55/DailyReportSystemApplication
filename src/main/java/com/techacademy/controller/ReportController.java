@@ -109,7 +109,6 @@ public class ReportController {
               
           }
           
-          reportService.save(report);
           
           return "redirect:/reports";
       }
