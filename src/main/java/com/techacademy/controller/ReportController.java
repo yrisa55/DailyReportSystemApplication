@@ -1,5 +1,6 @@
 package com.techacademy.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.constants.ErrorMessage;
+
+import jakarta.validation.Valid;
 
 import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
@@ -58,10 +61,13 @@ public class ReportController {
     
       // 日報新規登録画面
       @GetMapping(value = "/add")
-      public String create(Model model) {
+      public String create(Model model, @AuthenticationPrincipal UserDetail userDetail) {
           Report report = new Report();
           
-          report.setEmployee(new Employee());
+          // ログイン中の従業員を取得
+          Employee employee = employeeRepository.findByCode(userDetail.getUsername());
+          
+          report.setEmployee(employee);
           
           model.addAttribute("report", report);
 
@@ -70,9 +76,19 @@ public class ReportController {
     
       // 日報新規登録処理
       @PostMapping("/add")
-      public String add(@ModelAttribute Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
+      public String add(@Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
+          // ログインしているユーザーを設定
+          Employee employee = employeeRepository.findByCode(userDetail.getUsername());
+          report.setEmployee(employee);
+          
+          // 現在の日時をcreatedAtとupdatedAtに変更
+          LocalDateTime now = LocalDateTime.now();
+              report.setCreatedAt(now);
+              report.setUpdatedAt(now);
+          
+          
           // デバッグ用
-          System.out.println("Received report:" + report);
+          System.out.println("Received report:" + report.getTitle());
          
           if (res.hasErrors()) {
           System.out.println("BindingResultエラー" + res.hasErrors());
@@ -81,8 +97,6 @@ public class ReportController {
           }
           
           try {
-              Employee employee = employeeRepository.findByCode(userDetail.getUsername());
-              report.setEmployee(employee);
               
               // Reportを保存する
               System.out.println("保存前のレポート" + report);
@@ -94,6 +108,8 @@ public class ReportController {
               return "reports/new";
               
           }
+          
+          reportService.save(report);
           
           return "redirect:/reports";
       }
