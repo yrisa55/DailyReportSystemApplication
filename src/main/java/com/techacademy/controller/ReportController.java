@@ -64,9 +64,8 @@ public class ReportController {
       public String create(Model model, @AuthenticationPrincipal UserDetail userDetail) {
           Report report = new Report();
           
-          // ログイン中の従業員を取得
-          Employee employee = employeeRepository.findByCode(userDetail.getUsername());
-          
+          // ログイン中の従業員を取得 serviceに
+          Employee employee = employeeRepository.findByCode(userDetail.getUsername());       
           report.setEmployee(employee);
           
           model.addAttribute("report", report);
@@ -77,18 +76,18 @@ public class ReportController {
       // 日報新規登録処理
       @PostMapping("/add")
       public String add(@Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
-          // ログインしているユーザーを設定
-          Employee employee = employeeRepository.findByCode(userDetail.getUsername());
-          report.setEmployee(employee);
+            // ログインしているユーザーを設定
+            Employee employee = userDetail.getEmployee();
+            report.setEmployee(employee);
+         
+            // 現在の日時をcreatedAtとupdatedAtに変更　serviceでやるべき
+ //           LocalDateTime now = LocalDateTime.now();
+ //               report.setCreatedAt(now);
+ //               report.setUpdatedAt(now);
           
-          // 現在の日時をcreatedAtとupdatedAtに変更
-          LocalDateTime now = LocalDateTime.now();
-              report.setCreatedAt(now);
-              report.setUpdatedAt(now);
-          
-          
-          // デバッグ用
-          System.out.println("Received report:" + report.getTitle());
+//          
+//          // デバッグ用
+//          System.out.println("Received report:" + report.getTitle());
          
           if (res.hasErrors()) {
           System.out.println("BindingResultエラー" + res.hasErrors());
@@ -97,9 +96,6 @@ public class ReportController {
           }
           
           try {
-              
-              // Reportを保存する
-              System.out.println("保存前のレポート" + report);
               reportService.save(report);
               System.out.println("保存成功");
           } catch (DataIntegrityViolationException e) {
@@ -108,7 +104,6 @@ public class ReportController {
               return "reports/new";
               
           }
-          
           
           return "redirect:/reports";
       }
@@ -127,20 +122,24 @@ public class ReportController {
       }
       
       @PostMapping("/{id}/update")
-      public String update(@PathVariable int id, @Validated @ModelAttribute Report report, BindingResult res, Model model ) {
+      public String update(@PathVariable int id, @Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
+          
           if (res.hasErrors()) {
               System.out.println(res.getAllErrors());
-              return "reports/edit";
+              return "reports/update";
           }
           
           try {
-              reportService.update(report);
+              // 現在の従業員情報を取得
+              Employee employee = employeeRepository.findByCode(userDetail.getUsername());
+              // 取得したEmployeeをReportに設定
+              report.setEmployee(employee);
+              reportService.save(report);
            } catch (DataIntegrityViolationException e) {
            // エラーが発生した場合はエラーメッセージを追加して更新画面に戻す
            System.out.println("エラー発生: " + e);
-               e.printStackTrace(); // スタックトレースを表示
                model.addAttribute("error", e.getMessage());
-               return "reports/edit";
+               return "reports/update";
           }
   
          // 一覧画面にリダイレクト

@@ -59,13 +59,11 @@ public class Report {
     
     // 登録日時
     @Column(nullable = false)
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
 
     // 更新日時
     @Column(nullable = false)
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updatedAt;
     

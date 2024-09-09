@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.techacademy.constants.ErrorKinds;
+import com.techacademy.constants.ErrorMessage;
 import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
@@ -39,29 +40,7 @@ public class ReportService {
     
     // 日報保存
     public ErrorKinds save (Report report) {
-        // Employeeが新規であれば保存する
-        if(report.getEmployee().getCode() == null) {
-        employeeRepository.save(report.getEmployee());
-        }
-        
-//        // 日付チェック
-//        if (!"".equals(report.getReportDate())) {
-//            return ErrorKinds.BLANK_ERROR;
-//        }
-//        // タイトル空欄でないかチェック
-//        if (!"".equals(report.getTitle())) {
-//            return ErrorKinds.BLANK_ERROR;
-//        }
-//          
-//        // タイトル桁数超過チェック
-//          
-//        // 内容空欄でないかチェック
-//        if (!"".equals(report.getContent())) {
-//            return ErrorKinds.BLANK_ERROR;
-//        }
-//        // 内容桁数超過チェック
-        
-        
+       
         report.setDeleteFlg(false);
 
         LocalDateTime now = LocalDateTime.now();
@@ -71,6 +50,17 @@ public class ReportService {
         reportRepository.save(report);
         return ErrorKinds.SUCCESS;
     }
+    
+    //　社員番号重複チェック
+    public ErrorKinds create(Employee employee) {
+        // 同じ社員番号が存在するか確認
+        Employee existingEmployee = employeeRepository.findByCode(employee.getCode());
+        if(existingEmployee != null) {
+           return ErrorKinds.DUPLICATE_EXCEPTION_ERROR;
+                    
+        }
+        return ErrorKinds.SUCCESS;  
+        }
     
  //　従業員更新
     // --- 追加ここから ----
