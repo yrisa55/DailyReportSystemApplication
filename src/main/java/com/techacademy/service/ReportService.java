@@ -1,18 +1,14 @@
 package com.techacademy.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.techacademy.constants.ErrorKinds;
-import com.techacademy.constants.ErrorMessage;
-import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
 import com.techacademy.repository.EmployeeRepository;
@@ -38,29 +34,40 @@ public class ReportService {
         return reportRepository.findAll();
     }
     
+    @Transactional
     // 日報保存
     public ErrorKinds save (Report report) {
+        
+        // 送信された社員番号と日付を取得
+        String employeeCode = report.getEmployee().getCode();
+        System.out.println("employeeCode:" + employeeCode);
+        System.out.println("report:" + report.getReportDate());
+        System.out.println("report.getReportDate() before save:" + report.getReportDate());
+        
+        // 重複チェック
+        List<Report> existingReport = reportRepository.findByEmployeeCodeAndReportDate(employeeCode, report.getReportDate());
+        
+        if (existingReport.size() != 0) {
+                System.out.println("重複");
+                return ErrorKinds.DUPLICATE_EXCEPTION_ERROR; // 重複エラーを返す
+  
+        }
        
+        System.out.println("report.getReportDate() after 重複チェック:" + report.getReportDate());
+        
         report.setDeleteFlg(false);
 
         LocalDateTime now = LocalDateTime.now();
         report.setCreatedAt(now);
         report.setUpdatedAt(now);
+        
+        System.out.println("report before save:" + report.getReportDate());
 
         reportRepository.save(report);
         return ErrorKinds.SUCCESS;
     }
     
-    //　社員番号重複チェック
-    public ErrorKinds create(Employee employee) {
-        // 同じ社員番号が存在するか確認
-        Employee existingEmployee = employeeRepository.findByCode(employee.getCode());
-        if(existingEmployee != null) {
-           return ErrorKinds.DUPLICATE_EXCEPTION_ERROR;
-                    
-        }
-        return ErrorKinds.SUCCESS;  
-        }
+
     
  //　従業員更新
     // --- 追加ここから ----
@@ -81,7 +88,6 @@ public class ReportService {
         report.setUpdatedAt(now);
 
         this.reportRepository.save(report);
-        System.out.println(report);
         
         return ErrorKinds.SUCCESS;
     }
@@ -92,6 +98,14 @@ public class ReportService {
         Optional<Report> option = reportRepository.findById(id);
         // 取得できなかった場合はnullを返す
         Report report = option.orElse(null);
+        
+        if (report != null) {
+            System.out.println("データベースから取得したレポート：");
+            System.out.println("ID:" + report.getId());
+            System.out.println("タイトル:" + report.getTitle());
+            System.out.println("日付:" + report.getReportDate());
+            System.out.println("内容:" + report.getContent());
+        }
         return report;
     }
     

@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.constants.ErrorMessage;
 
-import jakarta.validation.Valid;
-
 import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.service.EmployeeService;
@@ -54,8 +52,12 @@ public class ReportController {
     // 日報詳細画面
     @GetMapping(value = "/{id}/")
     public String detail(@PathVariable int id, Model model) {
+        
+        Report report = reportService.findById(id);
+        
+        System.out.println("日付:" + report.getReportDate());
 
-        model.addAttribute("report", reportService.findById(id));
+        model.addAttribute("report", report);
         return "reports/detail";
     }
     
@@ -80,24 +82,21 @@ public class ReportController {
             Employee employee = userDetail.getEmployee();
             report.setEmployee(employee);
          
-            // 現在の日時をcreatedAtとupdatedAtに変更　serviceでやるべき
- //           LocalDateTime now = LocalDateTime.now();
- //               report.setCreatedAt(now);
- //               report.setUpdatedAt(now);
-          
-//          
-//          // デバッグ用
-//          System.out.println("Received report:" + report.getTitle());
-         
           if (res.hasErrors()) {
           System.out.println("BindingResultエラー" + res.hasErrors());
           System.out.println("バリデーションエラー" + res.getAllErrors());
+         
+          
           return "reports/new";
           }
           
           try {
               reportService.save(report);
               System.out.println("保存成功");
+              ErrorKinds result = reportService.save(report);
+              if (ErrorMessage.contains(result)) {
+                  model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+              }
           } catch (DataIntegrityViolationException e) {
               System.out.println("レポートセーブ中にエラー" + e.getMessage());
               model.addAttribute("error", "登録に失敗しました。");
@@ -134,16 +133,31 @@ public class ReportController {
               Employee employee = employeeRepository.findByCode(userDetail.getUsername());
               // 取得したEmployeeをReportに設定
               report.setEmployee(employee);
-              reportService.save(report);
-           } catch (DataIntegrityViolationException e) {
+              
+              System.out.println("Before update: " + report.getContent());
+              //reportService.update(report);
+              ErrorKinds result = reportService.update(report);
+              System.out.println("Update result:" + result);
+              
+              if (ErrorMessage.contains(result)) {
+                  model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+              } else {
+                  System.out.println("No error found.");
+              }
+              
+              // 更新成功した場合、一覧画面へ
+              return "reports/update";
+              
+           } catch (Exception e) {
            // エラーが発生した場合はエラーメッセージを追加して更新画面に戻す
            System.out.println("エラー発生: " + e);
+               e.printStackTrace(); 
                model.addAttribute("error", e.getMessage());
                return "reports/update";
           }
   
          // 一覧画面にリダイレクト
-         return "redirect:/reports";
+         //return "redirect:/reports";
        }
       
       // 日報削除処理
