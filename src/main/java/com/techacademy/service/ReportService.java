@@ -42,16 +42,18 @@ public class ReportService {
         
         // 送信された社員番号と日付を取得
         String employeeCode = report.getEmployee().getCode();
+        LocalDate reportDate = report.getReportDate();
         System.out.println("employeeCode:" + employeeCode);
-        System.out.println("report:" + report.getReportDate());
-        System.out.println("report.getReportDate() before save:" + report.getReportDate());
-        
+        System.out.println("reportDate:" + reportDate);
+
         // 重複チェック
         List<Report> existingReport = reportRepository.findByEmployeeCodeAndReportDate(employeeCode, report.getReportDate());
         
+        System.out.println("existingReport size:" + existingReport.size());
+        
         if (existingReport.size() != 0) {
                 System.out.println("重複");
-                return ErrorKinds.DUPLICATE_EXCEPTION_ERROR; // 重複エラーを返す
+                return ErrorKinds.DATECHECK_ERROR; // 重複エラーを返す
   
         }
        
@@ -129,6 +131,10 @@ public class ReportService {
     
     public List<Report> findByEmployee(Employee employee){
         return reportRepository.findByEmployee(employee);
+    }
+    
+    public List<Report> findReportsByEmployee(Employee employee){
+        return reportRepository.findReportsByEmployee(employee);
     }
     
     public void delete(int id) {

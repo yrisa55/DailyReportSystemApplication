@@ -41,10 +41,21 @@ public class ReportController {
     
     // 日報一覧画面
     @GetMapping
-    public String list(Model model) {
-         List<Report> report = reportService.findAll();
-         model.addAttribute("listSize", report.size());
-         model.addAttribute("reportList", report);
+    public String list(Model model, @AuthenticationPrincipal UserDetail userDetail) {
+         List<Report> reports;
+         
+         if (userDetail.getAuthorities().stream()
+                       .anyMatch(authority -> "ADMIN".equals(authority.getAuthority()))) {
+             // 管理者の場合は全日報を取得
+             reports = reportService.findAll();
+         } else {
+             //一般ユーザーの場合は自分の登録した日報のみを取得
+             Employee employee = userDetail.getEmployee();
+             reports = reportService.findReportsByEmployee(employee);
+         }
+         
+         model.addAttribute("listSize", reports.size());
+         model.addAttribute("reportList", reports);
 
         return "reports/list";
     }
@@ -93,17 +104,29 @@ public class ReportController {
           try {
               System.out.println("保存成功");
               ErrorKinds result = reportService.save(report);
+              
               if (ErrorMessage.contains(result)) {
-                  model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+                  
+                  String errorName = ErrorMessage.getErrorName(result);
+                  String errorValue = ErrorMessage.getErrorValue(result);
+                  model.addAttribute(errorName, errorValue);
+                  System.out.println("Error Name:" + errorName + ", Error Message:" + errorValue);
+                  return "reports/new";
               }
-          } catch (DataIntegrityViolationException e) {
+              
+              System.out.println("保存成功");
+              return "redirect:/reports";
+              
+          } catch (Exception e) {
+             
               System.out.println("レポートセーブ中にエラー" + e.getMessage());
-              model.addAttribute("error", "登録に失敗しました。");
+              e.printStackTrace();
+              model.addAttribute("error", "登録に失敗しました。エラー" + e.getMessage());
               return "reports/new";
               
           }
           
-          return "redirect:/reports";
+//          return "redirect:/reports";
       }
     
     
