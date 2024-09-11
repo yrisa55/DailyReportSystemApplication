@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.techacademy.constants.ErrorKinds;
@@ -73,23 +74,24 @@ public class ReportService {
     // --- 追加ここから ----
     public ErrorKinds update(Report report) {
         
-        Report existingReport = findById(report.getId());
+            String employeeCode = report.getEmployee().getCode();
         
-        if (existingReport != null) {
-            // 作成日時は既存のものを保持
-            report.setCreatedAt(existingReport.getCreatedAt());
-  
-        }
-        
-        //よく分からないけど上を真似した
-        report.setDeleteFlg(false);
-        
-        LocalDateTime now = LocalDateTime.now();
-        report.setUpdatedAt(now);
+            List<Report> existingReport = reportRepository.findByEmployeeCodeAndReportDate(employeeCode, report.getReportDate());
+            
+            if (existingReport.size() != 0) {
+                System.out.println("重複");
+                return ErrorKinds.DATECHECK_ERROR;
+            }
+            
+            report.setDeleteFlg(false);
+            
+            LocalDateTime now = LocalDateTime.now();
+            report.setUpdatedAt(now);
+            
+            this.reportRepository.save(report);
+            
+            return ErrorKinds.SUCCESS;
 
-        this.reportRepository.save(report);
-        
-        return ErrorKinds.SUCCESS;
     }
 
     // 1件を検索

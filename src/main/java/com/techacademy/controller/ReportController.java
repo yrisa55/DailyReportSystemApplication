@@ -91,7 +91,6 @@ public class ReportController {
           }
           
           try {
-              reportService.save(report);
               System.out.println("保存成功");
               ErrorKinds result = reportService.save(report);
               if (ErrorMessage.contains(result)) {
@@ -134,19 +133,19 @@ public class ReportController {
               // 取得したEmployeeをReportに設定
               report.setEmployee(employee);
               
-              System.out.println("Before update: " + report.getContent());
-              //reportService.update(report);
               ErrorKinds result = reportService.update(report);
-              System.out.println("Update result:" + result);
+              System.out.println("ErrorKinds Result:" + result);
               
               if (ErrorMessage.contains(result)) {
-                  model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-              } else {
-                  System.out.println("No error found.");
+                  String errorName = ErrorMessage.getErrorName(result);
+                  String errorValue = ErrorMessage.getErrorValue(result);
+                  model.addAttribute(errorName, errorValue);
+                  System.out.println("Error Name:" + errorName + ", Error Message:" + errorValue);
+//                  // 更新成功した場合、一覧画面へ
+                  return "reports/update";
+                  } else {
+                      System.out.println("No error message found for ErrroKindls Result:" + result);
               }
-              
-              // 更新成功した場合、一覧画面へ
-              return "reports/update";
               
            } catch (Exception e) {
            // エラーが発生した場合はエラーメッセージを追加して更新画面に戻す
@@ -156,8 +155,8 @@ public class ReportController {
                return "reports/update";
           }
   
-         // 一覧画面にリダイレクト
-         //return "redirect:/reports";
+          //一覧画面にリダイレクト
+         return "redirect:/reports";
        }
       
       // 日報削除処理
