@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.techacademy.constants.ErrorKinds;
+import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
 import com.techacademy.repository.EmployeeRepository;
@@ -74,11 +75,15 @@ public class ReportService {
     // --- 追加ここから ----
     public ErrorKinds update(Report report) {
         
+            Report existingReport = findById(report.getId());
+            
+            report.setCreatedAt(existingReport.getCreatedAt());
+        
             String employeeCode = report.getEmployee().getCode();
         
-            List<Report> existingReport = reportRepository.findByEmployeeCodeAndReportDate(employeeCode, report.getReportDate());
+            List<Report> existingReportList = reportRepository.findByEmployeeCodeAndReportDate(employeeCode, report.getReportDate());
             
-            if (existingReport.size() != 0) {
+            if (existingReportList.size() != 0) {
                 System.out.println("重複");
                 return ErrorKinds.DATECHECK_ERROR;
             }
@@ -92,6 +97,17 @@ public class ReportService {
             
             return ErrorKinds.SUCCESS;
 
+    }
+    
+    // 従業員削除
+    @Transactional
+    public ErrorKinds delete(int id, UserDetail userDetail) {
+        Report report = findById(id);
+        LocalDateTime now = LocalDateTime.now();
+        report.setUpdatedAt(now);
+        report.setDeleteFlg(true);
+
+        return ErrorKinds.SUCCESS;
     }
 
     // 1件を検索
@@ -109,6 +125,14 @@ public class ReportService {
             System.out.println("内容:" + report.getContent());
         }
         return report;
+    }
+    
+    public List<Report> findByEmployee(Employee employee){
+        return reportRepository.findByEmployee(employee);
+    }
+    
+    public void delete(int id) {
+        reportRepository.deleteById(id);
     }
     
     

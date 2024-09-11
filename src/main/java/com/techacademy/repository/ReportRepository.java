@@ -11,6 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ReportRepository extends JpaRepository<Report, Integer>  {
     List<Report> findByEmployeeCodeAndReportDate(String code, LocalDate reportDate);
 
-
+    List<Report> findByEmployee(Employee employee);
 }
 

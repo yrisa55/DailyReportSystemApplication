@@ -141,7 +141,7 @@ public class ReportController {
                   String errorValue = ErrorMessage.getErrorValue(result);
                   model.addAttribute(errorName, errorValue);
                   System.out.println("Error Name:" + errorName + ", Error Message:" + errorValue);
-//                  // 更新成功した場合、一覧画面へ
+                  // 更新成功した場合、一覧画面へ
                   return "reports/update";
                   } else {
                       System.out.println("No error message found for ErrroKindls Result:" + result);
@@ -160,4 +160,16 @@ public class ReportController {
        }
       
       // 日報削除処理
-}
+      @PostMapping("/{id}/delete")
+      public String delete(@PathVariable int id, @AuthenticationPrincipal UserDetail userDetail, Model model) {
+          ErrorKinds result = reportService.delete(id, userDetail);
+                  if (ErrorMessage.contains(result)) {
+                      model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+                      model.addAttribute("report", reportService.findById(id));
+                      return detail(id, model);
+                  }
+
+                  return "redirect:/reports";
+              }
+
+          }
