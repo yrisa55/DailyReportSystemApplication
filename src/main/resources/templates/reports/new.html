@@ -26,6 +26,11 @@
                                         <!--<p class="mb-1"></p>-->
                                         <div class="col-md-7">
                                             <input class="form-control" type="date" th:field="*{reportDate}" th:errorclass="err" id="date">
+                                            
+                                            <!-- バリデーションエラー（未入力時のエラーメッセージ） -->
+                                            <span th:if="${#fields.hasErrors('reportDate')}" th:errors="*{reportDate}" class="text-danger"></span>
+        
+                                            <!-- カスタムエラーメッセージ（日報が既に存在する場合） -->
                                             <span th:if="${reportDateError}" th:text="${reportDateError}" class="text-danger"></span>
                                         </div>
                                     </div>

@@ -83,7 +83,7 @@ public class ReportService {
         
             String employeeCode = report.getEmployee().getCode();
         
-            List<Report> existingReportList = reportRepository.findByEmployeeCodeAndReportDate(employeeCode, report.getReportDate());
+            List<Report> existingReportList = reportRepository.findByEmployeeCodeAndReportDateExcludingId(employeeCode, report.getReportDate(), report.getId());
             
             if (existingReportList.size() != 0) {
                 System.out.println("重複");
